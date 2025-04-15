@@ -372,57 +372,84 @@ with col1:
     if ss.pdf_ref:
         st.markdown("### PDF Preview")
         try:
-            # Convert PDF to images for display
-            import tempfile
-            from pdf2image import convert_from_bytes
-            
-            # Try to read the PDF and convert to images
+            # Get the binary data
             pdf_bytes = ss.pdf_ref.getvalue()
             
-            with st.spinner("Converting PDF to viewable format..."):
-                # Convert the first few pages (limit to 3 pages for performance)
-                images = convert_from_bytes(pdf_bytes, first_page=1, last_page=3)
+            # Show a download button for the PDF
+            st.download_button(
+                "📥 Download PDF for viewing",
+                data=pdf_bytes,
+                file_name=ss.file_name,
+                mime="application/pdf"
+            )
+            
+            # Try using PyMuPDF (which should already be installed for PyMuPDFLoader)
+            try:
+                import io
+                import fitz  # PyMuPDF
+                import PIL.Image
                 
-                # Show a download button for the PDF
-                st.download_button(
-                    "Download PDF",
-                    data=pdf_bytes,
-                    file_name=ss.file_name,
-                    mime="application/pdf"
-                )
-                
-                # Display the pages as images
-                if images:
-                    # Create tabs for each page
-                    if len(images) > 1:
-                        page_tabs = st.tabs([f"Page {i+1}" for i in range(len(images))])
-                        for i, image in enumerate(images):
-                            with page_tabs[i]:
-                                st.image(image, use_column_width=True)
-                    else:
-                        # Just display the single page
-                        st.image(images[0], use_column_width=True)
+                # Open the PDF from memory
+                with st.spinner("Generating PDF preview..."):
+                    pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+                    page_count = len(pdf_document)
                     
-                    if len(images) == 3:  # We limited to 3 pages
-                        st.info("Showing first 3 pages only. Download the PDF to view all pages.")
+                    # Show info about the PDF
+                    st.info(f"PDF has {page_count} page{'s' if page_count > 1 else ''}. Showing first page preview below.")
+                    
+                    # Limit to first page for performance
+                    first_page = pdf_document.load_page(0)  # First page
+                    pix = first_page.get_pixmap(matrix=fitz.Matrix(2, 2))  # Increase resolution
+                    
+                    # Convert to PIL Image
+                    img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
+                    
+                    # Display the first page
+                    st.image(img, caption=f"Page 1 of {page_count}", use_column_width=True)
+                    
+                    if page_count > 1:
+                        with st.expander("View more pages"):
+                            # Show up to 2 more pages
+                            max_pages = min(3, page_count)
+                            for i in range(1, max_pages):
+                                page = pdf_document.load_page(i)
+                                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                                img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
+                                st.image(img, caption=f"Page {i+1} of {page_count}", use_column_width=True)
+            
+            except ImportError:
+                st.warning("Could not generate detailed PDF preview. Using simpler preview.")
+                # Fall back to a simpler method
+                if ss.selected_file_path:
+                    try:
+                        from PIL import Image
+                        import subprocess
+                        import os
+                        
+                        # Save PDF to temp file
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                            tmp_pdf.write(pdf_bytes)
+                            pdf_path = tmp_pdf.name
+                        
+                        st.markdown("Preview not available directly in the browser. Please download the PDF to view it.")
+                        st.image("https://via.placeholder.com/700x900?text=Download+PDF+to+view", width=600)
+                    except Exception as inner_e:
+                        st.error(f"Error generating preview: {str(inner_e)}")
+                        st.image("https://via.placeholder.com/700x900?text=PDF+Preview+Unavailable", width=600)
                 else:
-                    st.error("Could not convert PDF to viewable format.")
+                    st.markdown("PDF preview not available. Please download the file to view it.")
                     
         except Exception as e:
             st.error(f"Error displaying PDF: {str(e)}")
-            # Fallback to basic image preview
-            try:
-                # Fallback to the old preview method
-                if ss.selected_file_path:
-                    preview_image = get_pdf_preview(ss.selected_file_path)
-                    if preview_image:
-                        st.image(preview_image, width=400, caption=f"Preview of {ss.file_name}")
-                    else:
-                        st.error("Could not generate PDF preview.")
-            except:
-                st.error("Could not display PDF. Please check if pdf2image is installed correctly.")
-                st.info("To install required dependencies: pip install pdf2image poppler-utils")
-                st.image("https://via.placeholder.com/400x500?text=PDF+Preview+Unavailable", width=400)
+            st.markdown("PDF preview could not be generated. Please download the file to view it.")
+            # Still provide the download button
+            st.download_button(
+                "📥 Download PDF",
+                data=ss.pdf_ref.getvalue() if ss.pdf_ref else b"",
+                file_name=ss.file_name if ss.file_name else "document.pdf",
+                mime="application/pdf",
+                key="download_fallback"
+            )
 
 with col2:
     # Processing options and methods tabs
