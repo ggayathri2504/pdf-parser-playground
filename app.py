@@ -472,19 +472,7 @@ with col2:
     
     # Place the process button directly under the Processing Results header
     # Create a centered process button with some styling
-    st.markdown(
-        """
-        <style>
-        div.stButton > button {
-            margin: 0 auto;
-            display: block;
-            padding: 0.5rem 1rem;
-            font-size: 1.1rem;
-        }
-        </style>
-        """, 
-        unsafe_allow_html=True
-    )
+    
     process_button = st.button("Process Document", key="process_main")
     
     # Process the document when the button is clicked
