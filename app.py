@@ -184,11 +184,12 @@ if 'selected_file_path' not in ss:
 if 'file_name' not in ss:
     ss.file_name = None
 
-st.title("PDF-Parser Playground")
+st.title("PDF Document Processor")
 st.write("Select a sample PDF document or upload your own, then select up to 4 processing methods to compare extraction results.")
 
 # Define paths for default PDF files from the pdf_files folder
-pdf_files_dir = os.path.join(os.path.dirname(__file__), "pdf_files")
+# Using a relative path instead of __file__
+pdf_files_dir = "pdf_files"  # Relative path to the pdf_files directory
 
 # Check if directory exists
 if not os.path.exists(pdf_files_dir):
@@ -371,11 +372,34 @@ with col1:
     if ss.pdf_ref:
         st.markdown("### PDF Preview")
         try:
-            # Get binary data from file
-            binary_data = ss.pdf_ref.getvalue()
-            # Use a fixed height for the PDF viewer to match the height of results
-            pdf_display = f'<iframe src="data:application/pdf;base64,{base64.b64encode(binary_data).decode()}" width="100%" height="800px" type="application/pdf" style="border: 1px solid #e6e6e6; border-radius: 5px;"></iframe>'
-            st.markdown(pdf_display, unsafe_allow_html=True)
+            # Instead of embedding the PDF directly with data URL, 
+            # we'll use Streamlit's native components
+            # First save to a temporary file that Streamlit can access
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                tmp_pdf.write(ss.pdf_ref.getvalue())
+                pdf_path = tmp_pdf.name
+            
+            # Use st.components.iframe to display the PDF
+            # This approach should avoid Chrome's security restrictions
+            pdf_display_container = st.container()
+            with pdf_display_container:
+                # Try to render using Streamlit's PDF viewer
+                st.write(f"Viewing: {ss.file_name}")
+                st.download_button(
+                    "Download PDF",
+                    data=ss.pdf_ref.getvalue(),
+                    file_name=ss.file_name,
+                    mime="application/pdf"
+                )
+                
+                # Use st.components.v1.iframe instead of raw HTML
+                import streamlit.components.v1 as components
+                # Use a relative path that the browser can access 
+                # with a query parameter to prevent caching
+                
+                # Alternative 1: Using native PDF display
+                st.components.v1.iframe(pdf_path, height=800, scrolling=True)
+                
         except Exception as e:
             st.error(f"Error displaying PDF: {str(e)}")
             # Fallback to the old preview method
@@ -387,8 +411,24 @@ with col1:
                     st.image("https://via.placeholder.com/400x500?text=PDF+Preview", width=400)
 
 with col2:
-    st.markdown("### Processing Results", unsafe_allow_html=True)
-
+    # Processing options and methods tabs
+    st.markdown("### Processing Results")
+    
+    # Place the process button directly under the Processing Results header
+    # Create a centered process button with some styling
+    st.markdown(
+        """
+        <style>
+        div.stButton > button {
+            margin: 0 auto;
+            display: block;
+            padding: 0.5rem 1rem;
+            font-size: 1.1rem;
+        }
+        </style>
+        """, 
+        unsafe_allow_html=True
+    )
     process_button = st.button("Process Document", key="process_main")
     
     # Process the document when the button is clicked
