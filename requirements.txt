@@ -20,4 +20,5 @@ streamlit-pdf-viewer
 openai
 amazon-textract-caller
 amazon-textract-textractor
+azure-ai-documentintelligence
 poppler-utils
