@@ -184,7 +184,7 @@ if 'selected_file_path' not in ss:
 if 'file_name' not in ss:
     ss.file_name = None
 
-st.title("PDF Document Processor")
+st.title("PDF-Parser Playground")
 st.write("Select a sample PDF document or upload your own, then select processing methods to compare extraction results.")
 
 # Define paths for default PDF files from the pdf_files folder
