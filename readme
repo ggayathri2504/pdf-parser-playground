@@ -1,0 +1,84 @@
+# PDF Document Processor Streamlit App
+
+This is a Streamlit application that provides a user-friendly interface for processing PDF documents using various document loaders and OCR services.
+
+## Features
+
+- Upload PDF documents
+- Choose from multiple processing methods:
+  - Basic PDF text extraction
+  - PDF extraction with layout awareness
+  - Table extraction
+  - OCR capabilities with various services
+- Download extracted text
+- Support for cloud services:
+  - AWS Textract
+  - Azure AI Document Intelligence
+  - Mathpix
+  - OpenAI Vision
+  - Mistral OCR
+
+## Installation
+
+1. Clone this repository
+2. Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Some methods may require additional system dependencies like Tesseract OCR or Poppler.
+
+## Usage
+
+1. Run the Streamlit app:
+
+```bash
+streamlit run app.py
+```
+
+2. Open your web browser and navigate to the URL shown in the terminal (typically http://localhost:8501)
+
+3. Upload a PDF document
+
+4. Select a processing method from the sidebar
+
+5. Enter any required API keys or credentials for the selected method
+
+6. Click "Process Document" to extract text
+
+7. View the extracted text and download it if needed
+
+## Processing Methods
+
+- **PyPDFLoader**: Basic PDF text extraction
+- **UnstructuredLoader**: Extracts text with layout awareness
+- **PDFPlumberLoader**: Good for PDFs with tables
+- **PyPDFium2Loader**: Fast PDF processing
+- **PyMuPDFLoader**: High-quality extraction with formatting
+- **PyMuPDF4LLMLoader**: Optimized for language models
+- **PDFMinerLoader**: Detailed PDF parsing
+- **DoclingLoader**: Document linguistics processing
+- **AmazonTextractPDFLoader**: AWS OCR service, requires AWS credentials
+- **MathpixPDFLoader**: Good for mathematical content, requires Mathpix API key
+- **AzureAIDocumentIntelligenceLoader**: Azure Document Analysis, requires Azure credentials
+- **VisionLLM**: Uses OpenAI vision models, requires OpenAI API key
+- **MistralOCR**: Uses Mistral OCR capabilities, requires Mistral API key
+
+## API Keys and Credentials
+
+For methods that require external services, you'll need to provide the appropriate credentials:
+
+- **AWS Textract**: AWS Access Key ID, Secret Access Key, and Region
+- **Mathpix**: API Key
+- **Azure AI Document Intelligence**: Endpoint URL and API Key
+- **OpenAI Vision**: API Key
+- **Mistral OCR**: API Key
+
+These credentials are entered securely in the sidebar when the corresponding method is selected.
+
+## Notes
+
+- The application saves uploaded files to a temporary location during processing and removes them afterward.
+- For large files, processing may take some time depending on the selected method.
+- Some methods may be better suited for certain types of PDFs (e.g., text-heavy, tables, scanned documents).s
