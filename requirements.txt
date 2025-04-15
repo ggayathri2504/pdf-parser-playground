@@ -17,4 +17,5 @@ PyMuPDF
 pdfplumber
 pypdfium2
 streamlit-pdf-viewer
+openai
 poppler-utils
