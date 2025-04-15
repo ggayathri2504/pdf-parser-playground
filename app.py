@@ -397,16 +397,36 @@ with col1:
                     # Show info about the PDF
                     st.info(f"PDF has {page_count} page{'s' if page_count > 1 else ''}.")
                     
-                    # Show all pages
-                    for page_num in range(page_count):
-                        page = pdf_document.load_page(page_num)
-                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # Increase resolution
+                    # Create tabs for page navigation
+                    if page_count > 1:
+                        # Create page selectors in 5-page groups
+                        page_groups = [list(range(i, min(i+5, page_count))) for i in range(0, page_count, 5)]
                         
-                        # Convert to PIL Image
+                        # Let user select page group if many pages
+                        if len(page_groups) > 1:
+                            group_labels = [f"Pages {g[0]+1}-{g[-1]+1}" for g in page_groups]
+                            selected_group_idx = st.radio("Select page range:", options=range(len(group_labels)), 
+                                                         format_func=lambda i: group_labels[i], horizontal=True)
+                            pages_to_show = page_groups[selected_group_idx]
+                        else:
+                            pages_to_show = page_groups[0]
+                        
+                        # Create tabs for the selected pages
+                        page_tabs = st.tabs([f"Page {i+1}" for i in pages_to_show])
+                        
+                        # Display each page in its tab
+                        for tab_idx, page_num in enumerate(pages_to_show):
+                            with page_tabs[tab_idx]:
+                                page = pdf_document.load_page(page_num)
+                                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # Increase resolution
+                                img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
+                                st.image(img, caption=f"Page {page_num+1} of {page_count}", use_container_width=True)
+                    else:
+                        # Just show the single page without tabs
+                        page = pdf_document.load_page(0)
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
                         img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
-                        
-                        # Display the page with the correct parameter
-                        st.image(img, caption=f"Page {page_num+1} of {page_count}", use_container_width=True)
+                        st.image(img, caption=f"Page 1 of 1", use_container_width=True)
             
             except ImportError:
                 st.warning("Could not generate detailed PDF preview. Using simpler preview.")
