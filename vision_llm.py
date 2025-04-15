@@ -4,12 +4,26 @@ import asyncio
 import shutil
 import logging
 from typing import List
-
+import fitz
 from openai import AsyncOpenAI
 from pdf2image import convert_from_path
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+# Then change your convert_from_path code to:
+def pdf_to_images(pdf_path, output_dir):
+    pdf_document = fitz.open(pdf_path)
+    image_paths = []
+    
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        pix = page.get_pixmap(alpha=False)
+        image_path = os.path.join(output_dir, f"page_{page_num + 1}.png")
+        pix.save(image_path)
+        image_paths.append(image_path)
+    
+    return image_paths
 
 class DocumentProcessor:
     def __init__(self, openai_key: str,max_concurrent_requests: int = 5):
@@ -88,14 +102,15 @@ class DocumentProcessor:
 
             if file_path.lower().endswith(".pdf"):
                 logger.info("Converting PDF to images: %s", file_path)
-                images = convert_from_path(file_path)
+                # images = convert_from_path(file_path)
                 image_paths: List[str] = []
+                image_paths = pdf_to_images(file_path, image_dir)
 
-                for i, image in enumerate(images):
-                    image_path = os.path.join(image_dir, f"page_{i + 1}.png")
-                    image.save(image_path, "PNG")
-                    image_paths.append(image_path)
-                    logger.info("Saved page %d as image: %s", i + 1, image_path)
+                # for i, image in enumerate(images):
+                #     image_path = os.path.join(image_dir, f"page_{i + 1}.png")
+                #     image.save(image_path, "PNG")
+                #     image_paths.append(image_path)
+                logger.info("Saved page as image", image_dir)
             else:
                 # For single image files
                 image_paths = [file_path]
