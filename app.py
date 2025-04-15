@@ -372,43 +372,57 @@ with col1:
     if ss.pdf_ref:
         st.markdown("### PDF Preview")
         try:
-            # Instead of embedding the PDF directly with data URL, 
-            # we'll use Streamlit's native components
-            # First save to a temporary file that Streamlit can access
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
-                tmp_pdf.write(ss.pdf_ref.getvalue())
-                pdf_path = tmp_pdf.name
+            # Convert PDF to images for display
+            import tempfile
+            from pdf2image import convert_from_bytes
             
-            # Use st.components.iframe to display the PDF
-            # This approach should avoid Chrome's security restrictions
-            pdf_display_container = st.container()
-            with pdf_display_container:
-                # Try to render using Streamlit's PDF viewer
-                st.write(f"Viewing: {ss.file_name}")
+            # Try to read the PDF and convert to images
+            pdf_bytes = ss.pdf_ref.getvalue()
+            
+            with st.spinner("Converting PDF to viewable format..."):
+                # Convert the first few pages (limit to 3 pages for performance)
+                images = convert_from_bytes(pdf_bytes, first_page=1, last_page=3)
+                
+                # Show a download button for the PDF
                 st.download_button(
                     "Download PDF",
-                    data=ss.pdf_ref.getvalue(),
+                    data=pdf_bytes,
                     file_name=ss.file_name,
                     mime="application/pdf"
                 )
                 
-                # Use st.components.v1.iframe instead of raw HTML
-                import streamlit.components.v1 as components
-                # Use a relative path that the browser can access 
-                # with a query parameter to prevent caching
-                
-                # Alternative 1: Using native PDF display
-                st.components.v1.iframe(pdf_path, height=800, scrolling=True)
-                
+                # Display the pages as images
+                if images:
+                    # Create tabs for each page
+                    if len(images) > 1:
+                        page_tabs = st.tabs([f"Page {i+1}" for i in range(len(images))])
+                        for i, image in enumerate(images):
+                            with page_tabs[i]:
+                                st.image(image, use_column_width=True)
+                    else:
+                        # Just display the single page
+                        st.image(images[0], use_column_width=True)
+                    
+                    if len(images) == 3:  # We limited to 3 pages
+                        st.info("Showing first 3 pages only. Download the PDF to view all pages.")
+                else:
+                    st.error("Could not convert PDF to viewable format.")
+                    
         except Exception as e:
             st.error(f"Error displaying PDF: {str(e)}")
-            # Fallback to the old preview method
-            if ss.selected_file_path:
-                preview_image = get_pdf_preview(ss.selected_file_path)
-                if preview_image:
-                    st.image(preview_image, width=400, caption=f"Preview of {ss.file_name}")
-                else:
-                    st.image("https://via.placeholder.com/400x500?text=PDF+Preview", width=400)
+            # Fallback to basic image preview
+            try:
+                # Fallback to the old preview method
+                if ss.selected_file_path:
+                    preview_image = get_pdf_preview(ss.selected_file_path)
+                    if preview_image:
+                        st.image(preview_image, width=400, caption=f"Preview of {ss.file_name}")
+                    else:
+                        st.error("Could not generate PDF preview.")
+            except:
+                st.error("Could not display PDF. Please check if pdf2image is installed correctly.")
+                st.info("To install required dependencies: pip install pdf2image poppler-utils")
+                st.image("https://via.placeholder.com/400x500?text=PDF+Preview+Unavailable", width=400)
 
 with col2:
     # Processing options and methods tabs
