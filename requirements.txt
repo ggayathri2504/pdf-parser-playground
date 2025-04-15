@@ -23,3 +23,4 @@ amazon-textract-textractor
 azure-ai-documentintelligence
 poppler-utils
 pi-heif
+unstructured-inference
