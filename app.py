@@ -185,7 +185,7 @@ if 'file_name' not in ss:
     ss.file_name = None
 
 st.title("PDF Document Processor")
-st.write("Select a sample PDF document or upload your own, then select up to 4 processing methods to compare extraction results.")
+st.write("Select a sample PDF document or upload your own, then select processing methods to compare extraction results.")
 
 # Define paths for default PDF files from the pdf_files folder
 # Using a relative path instead of __file__
@@ -250,21 +250,25 @@ available_methods = [
     "MistralOCR (Mistral)"
 ]
 
-st.sidebar.subheader("Select Processing Methods (up to 4)")
-selected_methods = []
+# Add a "Select All" checkbox
+select_all = st.sidebar.checkbox("Select All Methods")
 
-# Create a multiselect with a max of 4 options
-all_selected = st.sidebar.multiselect(
-    "Choose up to 4 methods to compare",
-    available_methods
-)
-
-# Enforce the limit of 4 methods
-if len(all_selected) > 4:
-    st.sidebar.warning("You've selected more than 4 methods. Only the first 4 will be used.")
-    selected_methods = all_selected[:4]
+# Conditional multiselect - if "Select All" is checked, select all methods
+if select_all:
+    selected_methods = available_methods.copy()
+    # Display the methods as disabled multiselect
+    st.sidebar.multiselect(
+        "Selected Methods:",
+        available_methods,
+        default=available_methods,
+        disabled=True
+    )
 else:
-    selected_methods = all_selected
+    # Create a multiselect without any limit
+    selected_methods = st.sidebar.multiselect(
+        "Choose processing methods to compare:",
+        available_methods
+    )
 
 # Conditional inputs based on selected methods
 if any("AmazonTextractPDFLoader" in method for method in selected_methods):
