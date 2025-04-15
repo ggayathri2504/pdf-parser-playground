@@ -19,4 +19,5 @@ pypdfium2
 streamlit-pdf-viewer
 openai
 amazon-textract-caller
+amazon-textract-textractor
 poppler-utils
