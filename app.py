@@ -395,27 +395,18 @@ with col1:
                     page_count = len(pdf_document)
                     
                     # Show info about the PDF
-                    st.info(f"PDF has {page_count} page{'s' if page_count > 1 else ''}. Showing first page preview below.")
+                    st.info(f"PDF has {page_count} page{'s' if page_count > 1 else ''}.")
                     
-                    # Limit to first page for performance
-                    first_page = pdf_document.load_page(0)  # First page
-                    pix = first_page.get_pixmap(matrix=fitz.Matrix(2, 2))  # Increase resolution
-                    
-                    # Convert to PIL Image
-                    img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
-                    
-                    # Display the first page
-                    st.image(img, caption=f"Page 1 of {page_count}", use_column_width=True)
-                    
-                    if page_count > 1:
-                        with st.expander("View more pages"):
-                            # Show up to 2 more pages
-                            max_pages = min(3, page_count)
-                            for i in range(1, max_pages):
-                                page = pdf_document.load_page(i)
-                                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-                                img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
-                                st.image(img, caption=f"Page {i+1} of {page_count}", use_column_width=True)
+                    # Show all pages
+                    for page_num in range(page_count):
+                        page = pdf_document.load_page(page_num)
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # Increase resolution
+                        
+                        # Convert to PIL Image
+                        img = PIL.Image.open(io.BytesIO(pix.tobytes("png")))
+                        
+                        # Display the page with the correct parameter
+                        st.image(img, caption=f"Page {page_num+1} of {page_count}", use_container_width=True)
             
             except ImportError:
                 st.warning("Could not generate detailed PDF preview. Using simpler preview.")
