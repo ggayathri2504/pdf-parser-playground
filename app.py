@@ -174,7 +174,7 @@ async def file_mistral_ocr(file_path, mistral_key=None):
     return "\n\n".join(page["markdown"] for page in response_dict["pages"])
 
 # Setup the Streamlit app
-st.set_page_config(page_title="PDF Document Processor", page_icon="📄", layout="wide")
+st.set_page_config(page_title="PDF-Parser Playground", page_icon="📄", layout="wide")
 
 # Initialize session state variables
 if 'pdf_ref' not in ss:
