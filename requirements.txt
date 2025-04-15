@@ -16,5 +16,4 @@ unstructured
 PyMuPDF
 pdfplumber
 pypdfium2
-pdf-parser
 streamlit-pdf-viewer
