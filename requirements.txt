@@ -9,7 +9,6 @@ mistralai
 langchain
 langchain-community
 langchain-unstructured
-langchain-docling
 langchain-pymupdf4llm
 PyPDF2
 unstructured
@@ -24,3 +23,4 @@ azure-ai-documentintelligence
 poppler-utils
 pi-heif
 unstructured-inference
+langchain-docling==0.2.0
