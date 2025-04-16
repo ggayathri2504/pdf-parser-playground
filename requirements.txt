@@ -25,3 +25,4 @@ poppler-utils
 pi-heif
 unstructured-inference
 llama-parse
+unstructured-pytesseract
