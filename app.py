@@ -22,6 +22,8 @@ from langchain_pymupdf4llm import PyMuPDF4LLMLoader
 from langchain_community.document_loaders import PDFMinerLoader
 from langchain_docling import DoclingLoader
 from langchain_community.document_loaders import AzureAIDocumentIntelligenceLoader
+import nest_asyncio
+nest_asyncio.apply()
 
 # Function to display PDF using HTML embed
 def display_pdf(file_path=None, file_bytes=None):
@@ -138,12 +140,15 @@ async def file_AzureAIDocumentIntelligenceLoader(file_path, endpoint=None, key=N
     docs = loader.load()
     return "\n\n".join(doc.page_content for doc in docs)
 
-async def file_vision_llm(file_path, openai_key=None):
+async def file_vision_llm_async(file_path, openai_key=None):
     from vision_llm import DocumentProcessor
     processor = DocumentProcessor(max_concurrent_requests=5, openai_key=openai_key)
-    result = asyncio.run(processor.process_document(file_path, os.path.basename(file_path)))
-    # result = await processor.process_document(file_path, os.path.basename(file_path))
-    return result
+    return await processor.process_document(file_path, os.path.basename(file_path))
+
+def file_vision_llm(file_path, openai_key=None):
+    return asyncio.get_event_loop().run_until_complete(
+        file_vision_llm_async(file_path, openai_key)
+    )
 
 async def file_mistral_ocr(file_path, mistral_key=None):
     client = Mistral(api_key=mistral_key)
