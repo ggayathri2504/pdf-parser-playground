@@ -23,4 +23,4 @@ azure-ai-documentintelligence
 poppler-utils
 pi-heif
 unstructured-inference
-langchain-docling==0.2.0
+docling
