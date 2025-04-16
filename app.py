@@ -22,7 +22,7 @@ from langchain_pymupdf4llm import PyMuPDF4LLMLoader
 from langchain_community.document_loaders import PDFMinerLoader
 # from langchain_docling import DoclingLoader
 from langchain_community.document_loaders import AzureAIDocumentIntelligenceLoader
-from docling.document_converter import DocumentConverter
+# from docling.document_converter import DocumentConverter
 
 import nest_asyncio
 nest_asyncio.apply()
@@ -145,15 +145,15 @@ async def file_AzureAIDocumentIntelligenceLoader(file_path, endpoint=None, key=N
     docs = loader.load()
     return "\n\n".join(doc.page_content for doc in docs)
 
-async def file_vision_llm_async(file_path, openai_key=None):
-    from vision_llm import DocumentProcessor
-    processor = DocumentProcessor(max_concurrent_requests=5, openai_key=openai_key)
-    return await processor.process_document(file_path, os.path.basename(file_path))
+# async def file_vision_llm_async(file_path, openai_key=None):
+#     from vision_llm import DocumentProcessor
+#     processor = DocumentProcessor(max_concurrent_requests=5, openai_key=openai_key)
+#     return await processor.process_document(file_path, os.path.basename(file_path))
 
-def file_vision_llm(file_path, openai_key=None):
-    return asyncio.get_event_loop().run_until_complete(
-        file_vision_llm_async(file_path, openai_key)
-    )
+# def file_vision_llm(file_path, openai_key=None):
+#     return asyncio.get_event_loop().run_until_complete(
+#         file_vision_llm_async(file_path, openai_key)
+#     )
 
 async def file_mistral_ocr(file_path, mistral_key=None):
     client = Mistral(api_key=mistral_key)
@@ -253,7 +253,7 @@ available_methods = [
     "PyPDFium2Loader",
     "PyMuPDFLoader",
     "PyMuPDF4LLMLoader",
-    "DoclingLoader",
+    # "DoclingLoader",
     "AmazonTextractPDFLoader (AWS)",
     "MathpixPDFLoader (API Key)",
     "AzureAIDocumentIntelligenceLoader (Azure)",
@@ -323,8 +323,8 @@ def run_processing_method(file_path, method):
         return asyncio.run(file_PyMuPDF4LLMLoader(file_path))
     elif method == "PDFMinerLoader":
         return asyncio.run(file_PDFMinerLoader(file_path))
-    elif method == "DoclingLoader":
-        return asyncio.run(file_DoclingLoader(file_path))
+    # elif method == "DoclingLoader":
+    #     return asyncio.run(file_DoclingLoader(file_path))
     elif method == "AmazonTextractPDFLoader (AWS)":
         return asyncio.run(file_AmazonTextractPDFLoader(
             file_path, 
@@ -699,7 +699,6 @@ with st.sidebar.expander("About Processing Methods"):
     - **PyPDFium2Loader**: Fast PDF processing
     - **PyMuPDFLoader**: High-quality extraction with formatting
     - **PyMuPDF4LLMLoader**: Optimized for language models
-    - **DoclingLoader**: Document linguistics processing
     - **AmazonTextractPDFLoader**: AWS OCR service
     - **MathpixPDFLoader**: Good for mathematical content
     - **AzureAIDocumentIntelligenceLoader**: Azure Document Analysis
