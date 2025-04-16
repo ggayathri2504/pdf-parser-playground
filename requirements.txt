@@ -1,4 +1,5 @@
 asyncio
+opencv-python
 streamlit
 pandas
 numpy
