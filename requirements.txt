@@ -24,4 +24,4 @@ azure-ai-documentintelligence
 poppler-utils
 pi-heif
 unstructured-inference
-docling
+llama-parse
