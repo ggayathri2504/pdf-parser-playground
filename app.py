@@ -20,8 +20,10 @@ from langchain_community.document_loaders import PyPDFium2Loader
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_pymupdf4llm import PyMuPDF4LLMLoader
 from langchain_community.document_loaders import PDFMinerLoader
-from langchain_docling import DoclingLoader
+# from langchain_docling import DoclingLoader
 from langchain_community.document_loaders import AzureAIDocumentIntelligenceLoader
+from docling.document_converter import DocumentConverter
+
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -130,9 +132,12 @@ async def file_PDFMinerLoader(file_path):
     return "\n\n".join(doc.page_content for doc in docs)
 
 async def file_DoclingLoader(file_path):
-    loader = DoclingLoader(file_path)
-    docs = loader.load()
-    return "\n\n".join(doc.page_content for doc in docs)
+    # loader = DoclingLoader(file_path)
+    # docs = loader.load()
+    # return "\n\n".join(doc.page_content for doc in docs)
+    converter = DocumentConverter()
+    result = converter.convert(source)
+    return result.document.export_to_markdown()
 
 async def file_AzureAIDocumentIntelligenceLoader(file_path, endpoint=None, key=None):
     loader = AzureAIDocumentIntelligenceLoader(
