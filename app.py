@@ -23,7 +23,7 @@ from langchain_community.document_loaders import PDFMinerLoader
 # from langchain_docling import DoclingLoader
 from langchain_community.document_loaders import AzureAIDocumentIntelligenceLoader
 # from docling.document_converter import DocumentConverter
-
+from llama_parse import LlamaParse
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -145,15 +145,28 @@ async def file_AzureAIDocumentIntelligenceLoader(file_path, endpoint=None, key=N
     docs = loader.load()
     return "\n\n".join(doc.page_content for doc in docs)
 
-# async def file_vision_llm_async(file_path, openai_key=None):
-#     from vision_llm import DocumentProcessor
-#     processor = DocumentProcessor(max_concurrent_requests=5, openai_key=openai_key)
-#     return await processor.process_document(file_path, os.path.basename(file_path))
 
-# def file_vision_llm(file_path, openai_key=None):
-#     return asyncio.get_event_loop().run_until_complete(
-#         file_vision_llm_async(file_path, openai_key)
-#     )
+async def file_llamaparse(file_path, llama_api_key=None):
+    parser = LlamaParse(
+        api_key=llama_api_key,  # can also be set in your env as LLAMA_CLOUD_API_KEY
+        result_type="markdown",  # "markdown" and "text" are available
+        num_workers=1,  # using 1 for single file processing
+        verbose=True,
+        language="en",  # Optionally you can define a language, default=en
+    )
+    
+    # Process the file
+    documents = parser.load_data(file_path)
+    
+    # Join the content from all documents
+    if documents:
+        return "\n\n".join(doc.text for doc in documents)
+    
+
+async def file_vision_llm(file_path, openai_key=None):
+    from vision_llm import DocumentProcessor
+    processor = DocumentProcessor(max_concurrent_requests=5, openai_key=openai_key)
+    return await processor.process_document(file_path, os.path.basename(file_path))
 
 async def file_mistral_ocr(file_path, mistral_key=None):
     client = Mistral(api_key=mistral_key)
@@ -245,7 +258,6 @@ else:
 st.sidebar.markdown("---")
 st.sidebar.header("Processing Methods")
 
-# List of available methods
 available_methods = [
     "PyPDFLoader (Basic)",
     "UnstructuredLoader",
@@ -258,7 +270,8 @@ available_methods = [
     "MathpixPDFLoader (API Key)",
     "AzureAIDocumentIntelligenceLoader (Azure)",
     "VisionLLM (OpenAI)",
-    "MistralOCR (Mistral)"
+    "MistralOCR (Mistral)",
+    "LlamaParse (API Key)"  # Add this line
 ]
 
 # Add a "Select All" checkbox
@@ -305,6 +318,11 @@ if any("MistralOCR" in method for method in selected_methods):
     st.sidebar.subheader("Mistral Credentials")
     mistral_key = st.sidebar.text_input("Mistral API Key", type="password")
 
+# Add this to the credential input section (around line ~450):
+if any("LlamaParse" in method for method in selected_methods):
+    st.sidebar.subheader("LlamaParse Credentials")
+    llama_api_key = st.sidebar.text_input("LlamaParse API Key", type="password")
+
 # Process button is now in the right column with the results
 
 # Function to run the selected processing method
@@ -344,6 +362,8 @@ def run_processing_method(file_path, method):
         return asyncio.run(file_vision_llm(file_path, openai_key))
     elif method == "MistralOCR (Mistral)":
         return asyncio.run(file_mistral_ocr(file_path, mistral_key))
+    elif method == "LlamaParse (API Key)":
+        return asyncio.run(file_llamaparse(file_path, llama_api_key))
     else:
         return "Unknown processing method"
 
@@ -704,6 +724,7 @@ with st.sidebar.expander("About Processing Methods"):
     - **AzureAIDocumentIntelligenceLoader**: Azure Document Analysis
     - **VisionLLM**: Uses OpenAI vision models
     - **MistralOCR**: Uses Mistral OCR capabilities
+    - **LlamaParse**: Anthropic's high-quality PDF parser optimized for LLMs
     """)
 
 # Add comparison information
