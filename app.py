@@ -523,7 +523,7 @@ with col2:
             try:
                 # First process all methods
                 with st.spinner(f"Processing document '{ss.file_name}' with selected methods..."):
-                    for method in selected_methods[:4]:  # Limit to first 4
+                    for method in selected_methods:  # Limit to first 4
                         try:
                             # Process the document and get the extracted text
                             extracted_text = run_processing_method(ss.selected_file_path, method)
@@ -536,7 +536,7 @@ with col2:
                 if results:
                     # Create tabs for each method
                     if len(selected_methods) > 0:
-                        tabs = st.tabs([method.split(' ')[0] for method in selected_methods[:4]])
+                        tabs = st.tabs([method.split(' ')[0] for method in selected_methods])
                         
                         for i, (method, text) in enumerate(results.items()):
                             with tabs[i]:
