@@ -20,9 +20,8 @@ from langchain_community.document_loaders import PyPDFium2Loader
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_pymupdf4llm import PyMuPDF4LLMLoader
 from langchain_community.document_loaders import PDFMinerLoader
-# from langchain_docling import DoclingLoader
+from langchain_docling import DoclingLoader
 from langchain_community.document_loaders import AzureAIDocumentIntelligenceLoader
-# from docling.document_converter import DocumentConverter
 from llama_parse import LlamaParse
 import nest_asyncio
 nest_asyncio.apply()
@@ -132,12 +131,9 @@ async def file_PDFMinerLoader(file_path):
     return "\n\n".join(doc.page_content for doc in docs)
 
 async def file_DoclingLoader(file_path):
-    # loader = DoclingLoader(file_path)
-    # docs = loader.load()
-    # return "\n\n".join(doc.page_content for doc in docs)
-    converter = DocumentConverter()
-    result = converter.convert(source)
-    return result.document.export_to_markdown()
+    loader = DoclingLoader(file_path)
+    docs = loader.load()
+    return "\n\n".join(doc.page_content for doc in docs)
 
 async def file_AzureAIDocumentIntelligenceLoader(file_path, endpoint=None, key=None):
     loader = AzureAIDocumentIntelligenceLoader(
@@ -265,7 +261,7 @@ available_methods = [
     "PyPDFium2Loader",
     "PyMuPDFLoader",
     "PyMuPDF4LLMLoader",
-    # "DoclingLoader",
+    "DoclingLoader",
     "AmazonTextractPDFLoader (AWS)",
     "MathpixPDFLoader (API Key)",
     "AzureAIDocumentIntelligenceLoader (Azure)",
@@ -341,8 +337,8 @@ def run_processing_method(file_path, method):
         return asyncio.run(file_PyMuPDF4LLMLoader(file_path))
     elif method == "PDFMinerLoader":
         return asyncio.run(file_PDFMinerLoader(file_path))
-    # elif method == "DoclingLoader":
-    #     return asyncio.run(file_DoclingLoader(file_path))
+    elif method == "DoclingLoader":
+        return asyncio.run(file_DoclingLoader(file_path))
     elif method == "AmazonTextractPDFLoader (AWS)":
         return asyncio.run(file_AmazonTextractPDFLoader(
             file_path, 
@@ -722,6 +718,7 @@ with st.sidebar.expander("About Processing Methods"):
     - **AmazonTextractPDFLoader**: AWS OCR service
     - **MathpixPDFLoader**: Good for mathematical content
     - **AzureAIDocumentIntelligenceLoader**: Azure Document Analysis
+    - **Docling** :IBM Docling loader
     - **VisionLLM**: Uses OpenAI vision models
     - **MistralOCR**: Uses Mistral OCR capabilities
     - **LlamaParse**: Anthropic's high-quality PDF parser optimized for LLMs
