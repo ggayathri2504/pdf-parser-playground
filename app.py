@@ -141,7 +141,8 @@ async def file_AzureAIDocumentIntelligenceLoader(file_path, endpoint=None, key=N
 async def file_vision_llm(file_path, openai_key=None):
     from vision_llm import DocumentProcessor
     processor = DocumentProcessor(max_concurrent_requests=5, openai_key=openai_key)
-    result = await processor.process_document(file_path, os.path.basename(file_path))
+    result = asyncio.run(processor.process_document(file_path, os.path.basename(file_path)))
+    # result = await processor.process_document(file_path, os.path.basename(file_path))
     return result
 
 async def file_mistral_ocr(file_path, mistral_key=None):
